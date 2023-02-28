@@ -50,7 +50,7 @@ def dice_cofficient(y_true, y_pred, smooth=1):
     return (2. * intersection + smooth) / (union + smooth)
 
 def test(model_path, image, device):
-    model = RA_Net(n_channels=1).to(device)
+    model = RA_Net(n_channels=1)
     model.load_state_dict(torch.load(model_path, map_location = torch.device(device)))
     impainted_image = None
     with torch.no_grad():

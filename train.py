@@ -44,7 +44,7 @@ class ContextEncoder(nn.Module):
 
 
 #hpyer paramters of the model
-INIT_LR = 0.0001
+INIT_LR = 0.000001
 BATCH_SIZE = 32
 EPOCHS = 10
 
@@ -80,7 +80,7 @@ print(len(train_loader.dataset))
 model = RA_Net(n_channels=1).to(device)
 optim = optim.Adam(model.parameters(), lr = INIT_LR)
 sigmoid = nn.Sigmoid()
-loss_func = nn.BCELoss()
+loss_func = nn.MSELoss()
 
 # this 'H' will save the training history
 H = {
@@ -95,6 +95,7 @@ for e in tqdm(range(EPOCHS)):
     model.train()
     train_loss = 0
     test_loss = 0
+    dice_score = 0
 
     for i,(image, real_image) in enumerate(train_loader):
         # image send to device (cpu or gpu)
@@ -105,7 +106,7 @@ for e in tqdm(range(EPOCHS)):
         outputs = model(image)
 
         # calculating loss
-        loss = loss_func(sigmoid(outputs), real_image)
+        loss = loss_func(outputs, real_image)
 
         # backward propagation
         loss.backward()
@@ -121,12 +122,16 @@ for e in tqdm(range(EPOCHS)):
         for i,(image,real_image) in enumerate(test_loader):
             (image,real_image) = (image.to(device), real_image.to(device))
 
-
+            ds = 0
             outputs = model(image)
-            test_loss += loss_func(sigmoid(outputs), real_image)
+            test_loss += loss_func(outputs, real_image)
+            for j in range(BATCH_SIZE):
+                ds += dice_cofficient(outputs[j], real_image[j])
+            dice_score += ds / BATCH_SIZE
     
     avg_train_loss = train_loss / train_steps
     avg_test_loss = test_loss / test_steps
+    avg_dice_score = dice_score / test_steps
 
     H['train_loss'].append(avg_train_loss.cpu().detach().numpy())
     H['test_loss'].append(avg_test_loss.cpu().detach().numpy())
@@ -134,6 +139,7 @@ for e in tqdm(range(EPOCHS)):
     print('[INFO] EPOCH : {}/{}'.format(e+1, EPOCHS))
     print('Train loss : {:.6f}'.format(avg_train_loss))
     print('Test loss : {:.6f}'.format(avg_test_loss))
+    print('Dice score : {:.6f}'.format(avg_dice_score))
 
 end_time = time.time()
 print('Total time taken to train model : {:.2f}s'.format(end_time - start_time))
