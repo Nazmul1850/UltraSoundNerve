@@ -9,6 +9,7 @@ import os
 import numpy as np
 from data_loader import process
 from rsaModel import RA_Net
+# from keras import backend as K
 
 class ContextEncoder(nn.Module):
     def __init__(self):
@@ -41,6 +42,12 @@ class ContextEncoder(nn.Module):
         input = self.deconv4(input)
 
         return input
+    
+
+def dice_cofficient(y_true, y_pred, smooth=1):
+    intersection = np.sum(y_true * y_pred)
+    union = np.sum(y_true) + np.sum(y_pred)
+    return (2. * intersection + smooth) / (union + smooth)
 
 def test(model_path, image, device):
     model = RA_Net(n_channels=1).to(device)
@@ -82,15 +89,24 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
 path = r'train'
 image = process(os.path.join(path,'15_51.tif'))
+image_mask = process(os.path.join(path,'15_51_mask.tif'))
 print(image.shape)
+print(image_mask.shape)
 transform = transforms.ToTensor()
 image = transform(image)
+image_mask = transform(image_mask)
 print(image.shape)
 image = torch.unsqueeze(image, dim=1)
+image_mask = torch.unsqueeze(image_mask, dim=1)
 print(image.shape)
+print(image_mask.shape)
 new_images = test('nerve_model_path.path', image, device)
 new_images = new_images.numpy()
+image_mask = image_mask.numpy()
 print(new_images.shape)
+print(image_mask.shape)
+dc = dice_cofficient(new_images, image_mask)
+print('Dice Coefficient: ', dc)
 # 0-255 pixel range
 for new_image in new_images:
     print(new_image)

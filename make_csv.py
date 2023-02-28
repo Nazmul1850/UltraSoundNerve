@@ -3,7 +3,7 @@ import csv
 import pandas as pd 
 import cv2
 names = []
-dir = 'sample'
+dir = 'train'
 for f in os.listdir(dir):
     if os.path.isfile(os.path.join(dir,f)):
         temp = f.split('_')

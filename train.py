@@ -58,7 +58,7 @@ print(device)
 
 
 # loading the dataset
-dataset = CustomDataset(csv_file='names.csv', image_dir='sample',
+dataset = CustomDataset(csv_file='names.csv', image_dir='train',
                          transorm=transforms.ToTensor())
 train_len = int(len(dataset)*TRAIN_SPLIT)
 test_len = len(dataset) - train_len
