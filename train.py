@@ -8,6 +8,7 @@ from tqdm import tqdm
 import time
 
 from data_loader import CustomDataset
+from rsaModel import RA_Net
 
 class ContextEncoder(nn.Module):
     def __init__(self):
@@ -43,7 +44,7 @@ class ContextEncoder(nn.Module):
 
 
 #hpyer paramters of the model
-INIT_LR = 0.001
+INIT_LR = 0.0001
 BATCH_SIZE = 32
 EPOCHS = 10
 
@@ -75,7 +76,8 @@ print('Test samples : {}'.format(len(test_loader.dataset)))
 print(len(train_loader.dataset))
 
 # initializing model parameters
-model = ContextEncoder().to(device)
+# model = ContextEncoder().to(device)
+model = RA_Net(n_channels=1).to(device)
 optim = optim.Adam(model.parameters(), lr = INIT_LR)
 sigmoid = nn.Sigmoid()
 loss_func = nn.BCELoss()
